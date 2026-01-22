@@ -1,12 +1,11 @@
 // src/App.tsx
 import Layout from './components/Layout';
+import EmployeeListPage from './pages/EmployeeListPage';
 
 function App() {
   return (
     <Layout>
-      <div>
-        abc
-      </div>
+      <EmployeeListPage />
     </Layout>
   );
 }
