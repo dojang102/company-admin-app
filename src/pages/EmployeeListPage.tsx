@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import { Search, Plus } from 'lucide-react';
 
@@ -33,9 +33,23 @@ const employees: Employee[] = [
     { id: '18', name: '林 結衣', furigana: 'ハヤシ ユイ', department: '総務部', position: '係長', email: 'hayashi.y@example.com', status: '在籍' },
     { id: '19', name: '斎藤 隆', furigana: 'サイトウ タカシ', department: '営業部', position: '社員', email: 'saito.t@example.com', status: '在籍' },
     { id: '20', name: '清水 健太', furigana: 'シミズ ケンタ', department: '開発部', position: '社員', email: 'shimizu.k@example.com', status: '在籍' },
+    { id: '21', name: '佐藤 健太', furigana: 'サトウ ケンタ', department: '開発部', position: '社員', email: 'sato.k@example.com', status: '在籍' },
+    { id: '22', name: '佐藤 翔太', furigana: 'サトウ ショウタ', department: '営業部', position: '社員', email: 'sato.s@example.com', status: '在籍' },
+    { id: '23', name: '田中 志保', furigana: 'タナカ シホ', department: 'マーケティング部', position: '係長', email: 'tanaka.s@example.com', status: '在籍' },
 ];
 
 const EmployeeListPage = () => {
+    const [inputSearch, setInputSearch] = useState('');
+    const [tableItems, setTableItems] = useState(employees);
+
+    const searchedEmployees = tableItems.filter(item =>
+        item.name.includes(inputSearch) ||
+        item.furigana.includes(inputSearch)
+    )
+
+    useEffect(() => {
+        console.log(inputSearch);
+    })
     return (
         <PageLayout
             title='社員リスト'
@@ -48,6 +62,7 @@ const EmployeeListPage = () => {
                     <input
                         type='text'
                         className='block w-96 pl-10 pr-3 py-2 bg-white rounded-xl border border-zinc-200 focus:outline-none'
+                        onChange={(e) => setInputSearch(e.target.value)}
                     />
                 </div>
                 <button className='flex px-4 py-2 items-center justify-center bg-zinc-800 rounded-lg text-white'>
@@ -68,7 +83,7 @@ const EmployeeListPage = () => {
                         </tr>
                     </thead>
                     <tbody className='divide-y divide-zinc-100'>
-                        {employees.map((employee) => (
+                        {searchedEmployees.map((employee) => (
                             <tr key={employee.id} className='hover:bg-zinc-200 transition-colors'>
                                 <td className='px-6 py-4 text-sm'>{employee.name}</td>
                                 <td className='px-6 py-4 text-sm'>{employee.furigana}</td>
