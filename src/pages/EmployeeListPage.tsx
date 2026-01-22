@@ -39,17 +39,34 @@ const employees: Employee[] = [
 ];
 
 const EmployeeListPage = () => {
-    const [inputSearch, setInputSearch] = useState('');
-    const [tableItems, setTableItems] = useState(employees);
+    const [inputSearch, setInputSearch] = useState('');         // input value
+    const [tableItems, setTableItems] = useState(employees);    // 社員データー
 
-    const searchedEmployees = tableItems.filter(item =>
-        item.name.includes(inputSearch) ||
-        item.furigana.includes(inputSearch)
-    )
+    // テーブルフィルタリング
+    const searchedEmployees = tableItems.filter(item => {
+        // ひらがなカタカナどっちでも検索可能
+        const hiraToKana = (str: string) =>
+            str.replace(/[\u3041-\u3096]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60));
 
-    useEffect(() => {
-        console.log(inputSearch);
-    })
+        // 空白無視
+        const noSpace = (str: string) =>
+            hiraToKana(str.replace(/\s+/g, ""));
+
+        // input valueの空白無視
+        const query = noSpace(inputSearch);
+        if (!query) return true;
+
+        // employeesの各項目の空白無視
+        const queryName = noSpace(item.name);
+        const queryFurigana = noSpace(item.furigana);
+
+        // 名前 || ふりがな
+        return (
+            queryName.includes(query) ||
+            queryFurigana.includes(query)
+        );
+    });
+
     return (
         <PageLayout
             title='社員リスト'
