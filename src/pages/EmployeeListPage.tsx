@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PageLayout from '../components/PageLayout';
-import { Search, Plus, ChevronUp, ChevronDown } from 'lucide-react';
+import { Search, Plus, ChevronUp, ChevronDown, X } from 'lucide-react';
 
 interface Employee {
     id: string;
@@ -56,6 +56,8 @@ const EmployeeListPage = () => {
         key: 'id',
         order: null,
     });
+
+    const [isOpenDrawer, setIsOpenDrawer] = useState(false);
 
     // ソートアイコンcss制御
     const SortIcon = ({ columnKey }: { columnKey: keyof Employee }) => {
@@ -135,6 +137,7 @@ const EmployeeListPage = () => {
         <PageLayout
             title='社員リスト'
         >
+            {/* 検索と追加ボタン */}
             <div className='flex justify-between items-center py-4'>
                 <div className='relative w-80'>
                     <div className='absolute inset-y-0 left-2 flex items-center'>
@@ -146,18 +149,23 @@ const EmployeeListPage = () => {
                         onChange={(e) => setInputSearch(e.target.value)}
                     />
                 </div>
-                <button className='flex px-4 py-2 items-center justify-center bg-zinc-800 rounded-lg text-white'>
+                <button
+                    className='flex px-4 py-2 items-center justify-center bg-zinc-800 rounded-lg text-white'
+                    onClick={() => setIsOpenDrawer(true)}
+                >
                     <Plus size={18} />
                     <span className='pl-2'>社員を追加</span>
                 </button>
             </div>
+
+            {/* 社員テーブル */}
             <div className='flex-1 relative overflow-x-auto overflow-y-auto bg-white rounded-xl border-zinc-200 shadow-sm'>
                 <table className='w-full border-collapse text-left'>
                     <thead>
                         <tr className='sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)]'>
                             {tableHeaders.map((tableHeader) => (
                                 <th
-                                    className='px-6 py-4 text-sm font-semibold'
+                                    className='px-6 py-4 text-sm font-semibold cursor-pointer'
                                     onClick={() => handleSort(tableHeader.key)}
                                 >
                                     <div className='flex items-center'>
@@ -171,7 +179,7 @@ const EmployeeListPage = () => {
                     </thead>
                     <tbody className='divide-y divide-zinc-100'>
                         {searchedEmployees.map((employee) => (
-                            <tr key={employee.id} className='hover:bg-zinc-200 transition-colors'>
+                            <tr key={employee.id} className='hover:bg-zinc-200 transition-colors cursor-default'>
                                 <td className='px-6 py-4 text-sm'>{employee.name}</td>
                                 <td className='px-6 py-4 text-sm'>{employee.furigana}</td>
                                 <td className='px-6 py-4 text-sm'>{employee.department}</td>
@@ -187,6 +195,76 @@ const EmployeeListPage = () => {
                         ))}
                     </tbody>
                 </table>
+            </div>
+            {/* 社員追加ドロワー */}
+            <div
+                className={`fixed inset-0 bg-black/20 z-40 transition-opacity duration-300 ${isOpenDrawer ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
+                onClick={() => setIsOpenDrawer(false)}
+            />
+            <div className={`fixed inset-y-0 right-0 w-[450px] z-50 m-4 transform transition-transform duration-300 ease-in-out ${isOpenDrawer ? 'translate-x-0' : 'translate-x-[calc(100%+32px)]'
+                }`}>
+                <div className='h-full flex flex-col p-6 bg-white rounded-md'>
+                    <div className='sticky top-0 flex items-center justify-between'>
+                        <h2 className='text-l font-bold'>
+                            社員を追加
+                        </h2>
+                        <X
+                            size={20}
+                            className='text-zinc-500'
+                            onClick={() => setIsOpenDrawer(false)}
+                        />
+                    </div>
+                    <form className='flex-1 overflow-y-auto p-6 space-y-6'>
+                        {tableHeaders.map((header) => (
+                            <div key={header.key}>
+                                <label className='block text-sm font-semibold text-zinc-700 mb-1'>
+                                    {header.label}
+                                </label>
+                                {header.key === 'department' ? (
+                                    <select className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none'>
+                                        <option value=''>部署を選択してください。</option>
+                                        <option value='開発部'>開発部</option>
+                                        <option value='営業部'>営業部</option>
+                                        <option value='人事部'>人事部</option>
+                                        <option value='総務部'>総務部</option>
+                                        <option value='マーケティング部'>マーケティング部</option>
+                                    </select>
+                                ) : header.key === 'position' ? (
+                                    <select className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none'>
+                                        <option value=''>役職を選択してください。</option>
+                                        <option value='部長'>部長</option>
+                                        <option value='課長'>課長</option>
+                                        <option value='係長'>係長</option>
+                                        <option value='主任'>主任</option>
+                                        <option value='社員'>社員</option>
+                                    </select>
+                                ) : header.key === 'status' ? (
+                                    <select className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none'>
+                                        <option value='在籍'>在籍</option>
+                                        <option value='休職中'>休職中</option>
+                                    </select>
+                                ) : (
+                                    <input
+                                        type='text'
+                                        placeholder={`${header.label}を入力してください`}
+                                        className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none focus:ring-2 focus:ring-zinc-800 transition-all'
+                                    />
+                                )}
+
+                            </div>
+                        ))}
+                    </form>
+                    <div className='flex items-center justify-end gap-2'>
+                        <button
+                            className='flex px-4 py-2 items-center justify-center border border-zinc-200 rounded-lg'
+                            onClick={() => setIsOpenDrawer(false)}
+                        >
+                            キャンセル
+                        </button>
+                        <button className='flex px-4 py-2 items-center justify-center bg-zinc-800 rounded-lg text-white'>保存する</button>
+                    </div>
+                </div>
             </div>
         </PageLayout>
     )
