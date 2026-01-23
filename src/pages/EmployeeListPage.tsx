@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PageLayout from '../components/PageLayout';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface Employee {
     id: string;
@@ -41,31 +41,95 @@ const employees: Employee[] = [
 const EmployeeListPage = () => {
     const [inputSearch, setInputSearch] = useState('');         // input value
     const [tableItems, setTableItems] = useState(employees);    // 社員データー
+    const tableHeaders: { key: keyof Employee; label: string; }[] = [
+        { key: 'name', label: '名前' },
+        { key: 'furigana', label: 'フリガナ' },
+        { key: 'department', label: '部署' },
+        { key: 'position', label: '役職' },
+        { key: 'email', label: 'メールアドレス' },
+        { key: 'status', label: 'ステータス' },
+    ];
 
-    // テーブルフィルタリング
-    const searchedEmployees = tableItems.filter(item => {
-        // ひらがなカタカナどっちでも検索可能
-        const hiraToKana = (str: string) =>
-            str.replace(/[\u3041-\u3096]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60));
+    type SortOrder = 'asc' | 'desc' | null;
 
-        // 空白無視
-        const noSpace = (str: string) =>
-            hiraToKana(str.replace(/\s+/g, ""));
-
-        // input valueの空白無視
-        const query = noSpace(inputSearch);
-        if (!query) return true;
-
-        // employeesの各項目の空白無視
-        const queryName = noSpace(item.name);
-        const queryFurigana = noSpace(item.furigana);
-
-        // 名前 || ふりがな
-        return (
-            queryName.includes(query) ||
-            queryFurigana.includes(query)
-        );
+    const [sortConfig, setSortConfig] = useState<{ key: keyof Employee; order: SortOrder }>({
+        key: 'id',
+        order: null,
     });
+
+    // ソートアイコンcss制御
+    const SortIcon = ({ columnKey }: { columnKey: keyof Employee }) => {
+        const isCorrectColumn = sortConfig.key === columnKey;
+        const isAsc = isCorrectColumn && sortConfig.order === 'asc';
+        const isDesc = isCorrectColumn && sortConfig.order === 'desc';
+
+        return (
+            <div className="flex flex-col ml-1">
+                <ChevronUp
+                    size={12}
+                    className={isAsc ? 'text-zinc-900' : 'text-zinc-400'}
+                />
+                <ChevronDown
+                    size={12}
+                    className={isDesc ? 'text-zinc-900' : 'text-zinc-400'}
+                />
+            </div>
+        )
+    }
+
+    // ソート機能
+    const handleSort = (key: keyof Employee) => {
+        setSortConfig(prev => {
+            if (prev.key === key) {
+                if (prev.order === 'asc') {
+                    return { key, order: 'desc' };
+                }
+                if (prev.order === 'desc') {
+                    return { key, order: null };
+                }
+            }
+            return { key, order: 'asc' };
+        });
+    };
+
+    const searchedEmployees = tableItems
+        // 検索結果
+        .filter(item => {
+            // ひらがなカタカナどっちでも検索可能
+            const hiraToKana = (str: string) =>
+                str.replace(/[\u3041-\u3096]/g, m => String.fromCharCode(m.charCodeAt(0) + 0x60));
+
+            // 空白無視
+            const noSpace = (str: string) =>
+                hiraToKana(str.replace(/\s+/g, ""));
+
+            // input valueの空白無視
+            const query = noSpace(inputSearch);
+            if (!query) return true;
+
+            // employeesの各項目の空白無視
+            const queryName = noSpace(item.name);
+            const queryFurigana = noSpace(item.furigana);
+
+            // 名前 || ふりがな
+            return (
+                queryName.includes(query) ||
+                queryFurigana.includes(query)
+            );
+        })
+        // ソート結果
+        .sort((a, b) => {
+            if (!sortConfig.order) return 0;
+
+            const aValue = String(a[sortConfig.key]);
+            const bValue = String(b[sortConfig.key]);
+
+            if (sortConfig.order === 'asc') {
+                return aValue.localeCompare(bValue, 'ja');
+            } else {
+                return bValue.localeCompare(aValue, 'ja');
+            }
+        });
 
     return (
         <PageLayout
@@ -91,12 +155,18 @@ const EmployeeListPage = () => {
                 <table className='w-full border-collapse text-left'>
                     <thead>
                         <tr className='sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.1)]'>
-                            <th className='px-6 py-4 text-sm font-semibold'>名前</th>
-                            <th className='px-6 py-4 text-sm font-semibold'>フリガナ</th>
-                            <th className='px-6 py-4 text-sm font-semibold'>部署</th>
-                            <th className='px-6 py-4 text-sm font-semibold'>役職</th>
-                            <th className='px-6 py-4 text-sm font-semibold'>メールアドレス</th>
-                            <th className='px-6 py-4 text-sm font-semibold'>ステータス</th>
+                            {tableHeaders.map((tableHeader) => (
+                                <th
+                                    className='px-6 py-4 text-sm font-semibold'
+                                    onClick={() => handleSort(tableHeader.key)}
+                                >
+                                    <div className='flex items-center'>
+                                        <span>{tableHeader.label}</span>
+                                        <SortIcon columnKey={tableHeader.key} />
+                                    </div>
+                                </th>
+                            ))}
+
                         </tr>
                     </thead>
                     <tbody className='divide-y divide-zinc-100'>

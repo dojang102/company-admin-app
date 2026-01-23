@@ -9,7 +9,7 @@ const Layout = ({ children }: LayoutProps) => {
     return (
         <div className='flex min-h-screen'>
 
-            <aside className='fixed inset-y-0 left-0 min-h-screen w-64 bg-zinc-800 text-white'>
+            <aside className='fixed inset-y-0 left-0 min-h-screen w-64 bg-zinc-800 text-white z-20'>
                 {/* ロゴ部分 */}
                 <div className='p-8 items-center'>
                     <strong>Company Admin</strong>
