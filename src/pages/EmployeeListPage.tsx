@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import { Search, Plus, ChevronUp, ChevronDown, X } from 'lucide-react';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 
 interface Employee {
     id: string;
@@ -37,6 +40,20 @@ const employees: Employee[] = [
     { id: '22', name: '佐藤 翔太', furigana: 'サトウ ショウタ', department: '営業部', position: '社員', email: 'sato.s@example.com', status: '在籍' },
     { id: '23', name: '田中 志保', furigana: 'タナカ シホ', department: 'マーケティング部', position: '係長', email: 'tanaka.s@example.com', status: '在籍' },
 ];
+
+const DEPARTMENTS = ['開発部', '営業部', '人事部', '総務部', 'マーケティング部'] as const;
+const POSITIONS = ['部長', '課長', '係長', '主任', '社員'] as const;
+
+const employeeValidation = z.object({
+    name: z.string().min(1, '名前は必須です'),
+    furigana: z.string().min(1, 'フリガナは必須です').regex(/^[ァ-ヶー\s]+$/, '全角カタカナで入力してください'),
+    department: z.string().min(1, '部署を選択してください'),
+    position: z.string().min(1, '役職を選択してください'),
+    email: z.string().min(1, 'メールアドレス必須です').email('正しいメール形式で入力してください'),
+    status: z.enum(['在籍', '休職中']),
+});
+
+type EmployeeFormData = z.infer<typeof employeeValidation>;
 
 const EmployeeListPage = () => {
     const [inputSearch, setInputSearch] = useState('');         // input value
@@ -133,6 +150,37 @@ const EmployeeListPage = () => {
             }
         });
 
+    const {
+        register,
+        handleSubmit,
+        reset,
+        watch,
+        formState: { errors },
+    } = useForm<EmployeeFormData>({
+        resolver: zodResolver(employeeValidation),
+        defaultValues: {
+            name: '',
+            furigana: '',
+            department: '',
+            position: '',
+            email: '',
+            status: '在籍',
+        },
+    });
+
+    const watchedValues = watch();
+
+    const onSubmit = (data: EmployeeFormData) => {
+        const newEmployee: Employee = {
+            ...data,
+            id: crypto.randomUUID(),
+        };
+
+        setTableItems((prev) => [newEmployee, ...prev]);
+        setIsOpenDrawer(false);
+        reset();
+    };
+
     return (
         <PageLayout
             title='社員リスト'
@@ -145,6 +193,7 @@ const EmployeeListPage = () => {
                     </div>
                     <input
                         type='text'
+                        placeholder='社員名、フリガナを入力…'
                         className='block w-96 pl-10 pr-3 py-2 bg-white rounded-xl border border-zinc-200 focus:outline-none'
                         onChange={(e) => setInputSearch(e.target.value)}
                     />
@@ -202,7 +251,7 @@ const EmployeeListPage = () => {
                     }`}
                 onClick={() => setIsOpenDrawer(false)}
             />
-            <div className={`fixed inset-y-0 right-0 w-[450px] z-50 m-4 transform transition-transform duration-300 ease-in-out ${isOpenDrawer ? 'translate-x-0' : 'translate-x-[calc(100%+32px)]'
+            <div className={`fixed inset-y-0 right-0 w-[400px] z-50 m-4 transform transition-transform duration-300 ease-in-out ${isOpenDrawer ? 'translate-x-0' : 'translate-x-[calc(100%+32px)]'
                 }`}>
                 <div className='h-full flex flex-col p-6 bg-white rounded-md'>
                     <div className='sticky top-0 flex items-center justify-between'>
@@ -215,54 +264,69 @@ const EmployeeListPage = () => {
                             onClick={() => setIsOpenDrawer(false)}
                         />
                     </div>
-                    <form className='flex-1 overflow-y-auto p-6 space-y-6'>
-                        {tableHeaders.map((header) => (
-                            <div key={header.key}>
-                                <label className='block text-sm font-semibold text-zinc-700 mb-1'>
-                                    {header.label}
-                                </label>
-                                {header.key === 'department' ? (
-                                    <select className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none'>
-                                        <option value=''>部署を選択してください。</option>
-                                        <option value='開発部'>開発部</option>
-                                        <option value='営業部'>営業部</option>
-                                        <option value='人事部'>人事部</option>
-                                        <option value='総務部'>総務部</option>
-                                        <option value='マーケティング部'>マーケティング部</option>
-                                    </select>
-                                ) : header.key === 'position' ? (
-                                    <select className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none'>
-                                        <option value=''>役職を選択してください。</option>
-                                        <option value='部長'>部長</option>
-                                        <option value='課長'>課長</option>
-                                        <option value='係長'>係長</option>
-                                        <option value='主任'>主任</option>
-                                        <option value='社員'>社員</option>
-                                    </select>
-                                ) : header.key === 'status' ? (
-                                    <select className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none'>
-                                        <option value='在籍'>在籍</option>
-                                        <option value='休職中'>休職中</option>
-                                    </select>
-                                ) : (
-                                    <input
-                                        type='text'
-                                        placeholder={`${header.label}を入力してください`}
-                                        className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none focus:ring-2 focus:ring-zinc-800 transition-all'
-                                    />
-                                )}
+                    <form
+                        id='employee-form'
+                        onSubmit={handleSubmit(onSubmit)}
+                        className='flex-1 overflow-y-auto p-6 space-y-6'
+                    >
+                        {tableHeaders.map((header) => {
+                            const hasError = !!errors[header.key as keyof EmployeeFormData];
+                            const currentValue = watchedValues[header.key as keyof EmployeeFormData];
+                            const isPlaceholder = currentValue === "";
+                            return (
+                                <div key={header.key}>
+                                    <label className='block text-sm font-semibold text-zinc-700 mb-1'>
+                                        {header.label}
+                                    </label>
+                                    {['department', 'position', 'status'].includes(header.key) ? (
+                                        <select
+                                            {...register(header.key as any)}
+                                            className={`w-full border rounded-xl p-2 focus:outline-none transition-all
+                                            ${hasError ? 'border-red-500' : 'border-zinc-200'}
+                                            ${isPlaceholder ? 'text-zinc-400': 'text-zinc-900'}
+                                        `}>
+                                            {header.key !== 'status' &&
+                                                <option value=''>
+                                                    {header.label}を選択してください
+                                                </option>
+                                            }
+                                            {(header.key === 'department' ? DEPARTMENTS :
+                                                header.key === 'position' ? POSITIONS :
+                                                    ['在籍', '休職中']).map((opt) => (
+                                                        <option key={opt} value={opt}>{opt}</option>
+                                                    ))}
+                                        </select>
+                                    ) : (
+                                        <input
+                                            {...register(header.key as any)}
+                                            type='text'
+                                            placeholder={`${header.label}を入力してください`}
+                                            className={`w-full border rounded-xl p-2 focus:outline-none transition-all
+                                            ${hasError ? 'border-red-500' : 'border-zinc-200 focus:ring-2 focus:ring-zinc-800'}
+                                            `}
+                                        />
+                                    )}
 
-                            </div>
-                        ))}
+                                    {errors[header.key as keyof EmployeeFormData] && (
+                                        <p className="text-red-500 text-xs mt-1 ml-1">
+                                            {errors[header.key as keyof EmployeeFormData]?.message}
+                                        </p>
+                                    )}
+                                </div>
+                            )
+                        })}
                     </form>
                     <div className='flex items-center justify-end gap-2'>
                         <button
-                            className='flex px-4 py-2 items-center justify-center border border-zinc-200 rounded-lg'
-                            onClick={() => setIsOpenDrawer(false)}
-                        >
+                            className='flex px-4 py-2 items-center justify-center border border-zinc-200 rounded-lg'>
                             キャンセル
                         </button>
-                        <button className='flex px-4 py-2 items-center justify-center bg-zinc-800 rounded-lg text-white'>保存する</button>
+                        <button
+                            type='submit'
+                            form='employee-form'
+                            className='flex px-4 py-2 items-center justify-center bg-zinc-800 rounded-lg text-white'
+                            onClick={() => onSubmit}
+                        >保存する</button>
                     </div>
                 </div>
             </div>
