@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Users, CalendarCheck, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -9,6 +10,15 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
     const navigate = useNavigate();
     const location = useLocation();
+
+    useEffect(() => {
+        const isAuthenticated = localStorage.getItem('is-authenticated');
+
+        if (isAuthenticated !== 'true') {
+            toast.error('セッションが切れました。再ログインしてください。');
+            navigate('/login', { replace: true });
+        }
+    }, [navigate]);
 
     const isActive = (path: string) => {
         if (path === '/employees') {
@@ -25,6 +35,14 @@ const Layout = ({ children }: LayoutProps) => {
 
         return `${baseStyle} ${isCurrent ? activeStyle : inactiveStyle}`;
     };
+
+    const handleLogout = () => {
+        localStorage.removeItem('is_authenticated');
+
+        toast.info('ログアウトしました');
+
+        navigate('/login', { replace: true });
+    }
 
     return (
         <div className='flex min-h-screen'>
@@ -61,19 +79,18 @@ const Layout = ({ children }: LayoutProps) => {
 
                 {/* 下部のボタン */}
                 <div className='absolute bottom-0 w-full p-4'>
-                    {/* <div className='flex items-center'>
-                        <div className='w-10 h-10 bg-sky-500 rounded-full'>写真</div>
-                        <div>プロフィール</div>
-                    </div> */}
-                    <button className='flex items-center w-full gap-3 px-3 py-2 rounded-sm hover:bg-zinc-700'>
+                    <button
+                        onClick={handleLogout}
+                        className='flex items-center w-full gap-3 px-3 py-2 rounded-sm hover:bg-zinc-700'
+                    >
                         <LogOut size={18} />
                         <span>ログアウト</span>
                     </button>
                 </div>
             </aside>
 
+            {/* コンテンツ */}
             <main className='flex-1 ml-64 min-h-screen bg-slate-50'>
-                {/* ページ内容 */}
                 {children}
             </main>
 

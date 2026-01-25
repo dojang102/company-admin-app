@@ -1,6 +1,4 @@
 import React from "react";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 interface PageLayoutProps {
     title: string;      // ページタイトル
@@ -17,7 +15,6 @@ const PageLayout = ({ title, children }: PageLayoutProps) => {
             {/* コンテンツ内容 */}
             <div className='flex-1 flex flex-col min-h-0'>
                 {children}
-                <ToastContainer position="top-right" autoClose={3000} />
             </div>
         </div>
     );
