@@ -4,8 +4,9 @@ import { Search, Plus, ChevronUp, ChevronDown, X } from 'lucide-react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 
-interface Employee {
+export interface Employee {
     id: string;
     name: string;
     furigana: string;
@@ -15,34 +16,34 @@ interface Employee {
     status: '在籍' | '休職中';
 }
 
-const employees: Employee[] = [
-    // { id: '1', name: '田中 太郎', furigana: 'タナカ タロウ', department: '開発部', position: '部長', email: 'tanaka@example.com', status: '在籍' },
-    // { id: '2', name: '佐藤 花子', furigana: 'サトウ ハナコ', department: '人事部', position: '社員', email: 'sato@example.com', status: '在籍' },
-    // { id: '3', name: '鈴木 一郎', furigana: 'スズキ イチロウ', department: '営業部', position: '係長', email: 'suzuki@example.com', status: '休職中' },
-    // { id: '4', name: '高橋 健二', furigana: 'タカハシ ケンジ', department: '開発部', position: '課長', email: 'takahashi.k@example.com', status: '在籍' },
-    // { id: '5', name: '伊藤 恵子', furigana: 'イトウ ケイコ', department: '総務部', position: '社員', email: 'ito.k@example.com', status: '在籍' },
-    // { id: '6', name: '渡辺 誠', furigana: 'ワタナベ マコト', department: '開発部', position: '社員', email: 'watanabe.m@example.com', status: '在籍' },
-    // { id: '7', name: '山本 裕子', furigana: 'ヤマモト ユウコ', department: '営業部', position: '課長', email: 'yamamoto.y@example.com', status: '在籍' },
-    // { id: '8', name: '中村 俊介', furigana: 'ナカムラ シュンスケ', department: 'マーケティング部', position: '社員', email: 'nakamura.s@example.com', status: '在籍' },
-    // { id: '9', name: '小林 直樹', furigana: 'コバヤシ ナオキ', department: '開発部', position: '係長', email: 'kobayashi.n@example.com', status: '休職中' },
-    // { id: '10', name: '加藤 真由美', furigana: 'カトウ マユミ', department: '人事部', position: '課長', email: 'kato.m@example.com', status: '在籍' },
-    // { id: '11', name: '吉田 拓也', furigana: 'ヨシダ タクヤ', department: '営業部', position: '社員', email: 'yoshida.t@example.com', status: '在籍' },
-    // { id: '12', name: '山田 杏奈', furigana: 'ヤマダ アンナ', department: '総務部', position: '社員', email: 'yamada.a@example.com', status: '在籍' },
-    // { id: '13', name: '佐々木 亮', furigana: 'ササキ リョウ', department: '開発部', position: '社員', email: 'sasaki.r@example.com', status: '在籍' },
-    // { id: '14', name: '山口 祥子', furigana: 'ヤマグチ ショウコ', department: 'マーケティング部', position: '部長', email: 'yamaguchi.s@example.com', status: '在籍' },
-    // { id: '15', name: '松本 潤', furigana: 'マツモト ジュン', department: '営業部', position: '社員', email: 'matsumoto.j@example.com', status: '在籍' },
-    // { id: '16', name: '井上 舞', furigana: 'イノウエ マイ', department: '人事部', position: '社員', email: 'inoue.m@example.com', status: '在籍' },
-    // { id: '17', name: '木村 浩一', furigana: 'キムラ コウイチ', department: '開発部', position: '社員', email: 'kimura.k@example.com', status: '休職中' },
-    // { id: '18', name: '林 結衣', furigana: 'ハヤシ ユイ', department: '総務部', position: '係長', email: 'hayashi.y@example.com', status: '在籍' },
-    // { id: '19', name: '斎藤 隆', furigana: 'サイトウ タカシ', department: '営業部', position: '社員', email: 'saito.t@example.com', status: '在籍' },
-    // { id: '20', name: '清水 健太', furigana: 'シミズ ケンタ', department: '開発部', position: '社員', email: 'shimizu.k@example.com', status: '在籍' },
-    // { id: '21', name: '佐藤 健太', furigana: 'サトウ ケンタ', department: '開発部', position: '社員', email: 'sato.k@example.com', status: '在籍' },
-    // { id: '22', name: '佐藤 翔太', furigana: 'サトウ ショウタ', department: '営業部', position: '社員', email: 'sato.s@example.com', status: '在籍' },
-    // { id: '23', name: '田中 志保', furigana: 'タナカ シホ', department: 'マーケティング部', position: '係長', email: 'tanaka.s@example.com', status: '在籍' },
+export const employees: Employee[] = [
+    { id: '1', name: '田中 太郎', furigana: 'タナカ タロウ', department: '開発部', position: '部長', email: 'tanaka@example.com', status: '在籍' },
+    { id: '2', name: '佐藤 花子', furigana: 'サトウ ハナコ', department: '人事部', position: '社員', email: 'sato@example.com', status: '在籍' },
+    { id: '3', name: '鈴木 一郎', furigana: 'スズキ イチロウ', department: '営業部', position: '係長', email: 'suzuki@example.com', status: '休職中' },
+    { id: '4', name: '高橋 健二', furigana: 'タカハシ ケンジ', department: '開発部', position: '課長', email: 'takahashi.k@example.com', status: '在籍' },
+    { id: '5', name: '伊藤 恵子', furigana: 'イトウ ケイコ', department: '総務部', position: '社員', email: 'ito.k@example.com', status: '在籍' },
+    { id: '6', name: '渡辺 誠', furigana: 'ワタナベ マコト', department: '開発部', position: '社員', email: 'watanabe.m@example.com', status: '在籍' },
+    { id: '7', name: '山本 裕子', furigana: 'ヤマモト ユウコ', department: '営業部', position: '課長', email: 'yamamoto.y@example.com', status: '在籍' },
+    { id: '8', name: '中村 俊介', furigana: 'ナカムラ シュンスケ', department: 'マーケティング部', position: '社員', email: 'nakamura.s@example.com', status: '在籍' },
+    { id: '9', name: '小林 直樹', furigana: 'コバヤシ ナオキ', department: '開発部', position: '係長', email: 'kobayashi.n@example.com', status: '休職中' },
+    { id: '10', name: '加藤 真由美', furigana: 'カトウ マユミ', department: '人事部', position: '課長', email: 'kato.m@example.com', status: '在籍' },
+    { id: '11', name: '吉田 拓也', furigana: 'ヨシダ タクヤ', department: '営業部', position: '社員', email: 'yoshida.t@example.com', status: '在籍' },
+    { id: '12', name: '山田 杏奈', furigana: 'ヤマダ アンナ', department: '総務部', position: '社員', email: 'yamada.a@example.com', status: '在籍' },
+    { id: '13', name: '佐々木 亮', furigana: 'ササキ リョウ', department: '開発部', position: '社員', email: 'sasaki.r@example.com', status: '在籍' },
+    { id: '14', name: '山口 祥子', furigana: 'ヤマグチ ショウコ', department: 'マーケティング部', position: '部長', email: 'yamaguchi.s@example.com', status: '在籍' },
+    { id: '15', name: '松本 潤', furigana: 'マツモト ジュン', department: '営業部', position: '社員', email: 'matsumoto.j@example.com', status: '在籍' },
+    { id: '16', name: '井上 舞', furigana: 'イノウエ マイ', department: '人事部', position: '社員', email: 'inoue.m@example.com', status: '在籍' },
+    { id: '17', name: '木村 浩一', furigana: 'キムラ コウイチ', department: '開発部', position: '社員', email: 'kimura.k@example.com', status: '休職中' },
+    { id: '18', name: '林 結衣', furigana: 'ハヤシ ユイ', department: '総務部', position: '係長', email: 'hayashi.y@example.com', status: '在籍' },
+    { id: '19', name: '斎藤 隆', furigana: 'サイトウ タカシ', department: '営業部', position: '社員', email: 'saito.t@example.com', status: '在籍' },
+    { id: '20', name: '清水 健太', furigana: 'シミズ ケンタ', department: '開発部', position: '社員', email: 'shimizu.k@example.com', status: '在籍' },
+    { id: '21', name: '佐藤 健太', furigana: 'サトウ ケンタ', department: '開発部', position: '社員', email: 'sato.k@example.com', status: '在籍' },
+    { id: '22', name: '佐藤 翔太', furigana: 'サトウ ショウタ', department: '営業部', position: '社員', email: 'sato.s@example.com', status: '在籍' },
+    { id: '23', name: '田中 志保', furigana: 'タナカ シホ', department: 'マーケティング部', position: '係長', email: 'tanaka.s@example.com', status: '在籍' },
 ];
 
-const DEPARTMENTS = ['開発部', '営業部', '人事部', '総務部', 'マーケティング部'] as const;
-const POSITIONS = ['部長', '課長', '係長', '主任', '社員'] as const;
+export const DEPARTMENTS = ['開発部', '営業部', '人事部', '総務部', 'マーケティング部'] as const;
+export const POSITIONS = ['部長', '課長', '係長', '主任', '社員'] as const;
 
 const employeeValidation = z.object({
     name: z.string().min(1, '名前は必須です'),
@@ -55,9 +56,24 @@ const employeeValidation = z.object({
 
 type EmployeeFormData = z.infer<typeof employeeValidation>;
 
+// メイン
 const EmployeeListPage = () => {
     const [inputSearch, setInputSearch] = useState('');         // input value
-    const [tableItems, setTableItems] = useState(employees);    // 社員データー
+    // const [tableItems, setTableItems] = useState(employees);    // 社員データー
+    const [tableItems, setTableItems] = useState<Employee[]>(() => {
+        const saved = localStorage.getItem('employee-data');
+
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                return employees;
+            }
+        }
+        localStorage.setItem('employee-data', JSON.stringify(employees));
+        return employees;
+    });    // 社員データー
+
     const tableHeaders: { key: keyof Employee; label: string; }[] = [
         { key: 'name', label: '名前' },
         { key: 'furigana', label: 'フリガナ' },
@@ -75,6 +91,8 @@ const EmployeeListPage = () => {
     });
 
     const [isOpenDrawer, setIsOpenDrawer] = useState(false);
+
+    const navigate = useNavigate();
 
     // ソートアイコンcss制御
     const SortIcon = ({ columnKey }: { columnKey: keyof Employee }) => {
@@ -158,6 +176,8 @@ const EmployeeListPage = () => {
         formState: { errors },
     } = useForm<EmployeeFormData>({
         resolver: zodResolver(employeeValidation),
+        mode: 'onSubmit',
+        reValidateMode: 'onChange',
         defaultValues: {
             name: '',
             furigana: '',
@@ -170,16 +190,27 @@ const EmployeeListPage = () => {
 
     const watchedValues = watch();
 
+    // 登録保存機能
     const onSubmit = (data: EmployeeFormData) => {
         const newEmployee: Employee = {
             ...data,
             id: crypto.randomUUID(),
         };
 
-        setTableItems((prev) => [newEmployee, ...prev]);
+        const updatedItems = [newEmployee, ...tableItems];
+
+        setTableItems(updatedItems);
+
+        localStorage.setItem('employee-data', JSON.stringify(updatedItems));
+
         setIsOpenDrawer(false);
         reset();
     };
+
+    const handleCancel = () => {
+        reset();
+        setIsOpenDrawer(false);
+    }
 
     return (
         <PageLayout
@@ -247,7 +278,11 @@ const EmployeeListPage = () => {
                             </tr>
                         ) : (
                             searchedEmployees.map((employee) => (
-                                <tr key={employee.id} className='hover:bg-zinc-200 transition-colors cursor-default'>
+                                <tr
+                                    key={employee.id}
+                                    className='hover:bg-zinc-200 transition-colors cursor-default'
+                                    onClick={() => navigate(`/employees/${employee.id}`)}
+                                >
                                     <td className='px-6 py-4 text-sm'>{employee.name}</td>
                                     <td className='px-6 py-4 text-sm'>{employee.furigana}</td>
                                     <td className='px-6 py-4 text-sm'>{employee.department}</td>
@@ -338,15 +373,18 @@ const EmployeeListPage = () => {
                     </form>
                     <div className='flex items-center justify-end gap-2'>
                         <button
-                            className='flex px-4 py-2 items-center justify-center border border-zinc-200 rounded-lg'>
+                            className='flex px-4 py-2 items-center justify-center border border-zinc-200 rounded-lg'
+                            onClick={handleCancel}
+                        >
                             キャンセル
                         </button>
                         <button
                             type='submit'
                             form='employee-form'
                             className='flex px-4 py-2 items-center justify-center bg-zinc-800 rounded-lg text-white'
-                            onClick={() => onSubmit}
-                        >保存する</button>
+                        >
+                            保存する
+                        </button>
                     </div>
                 </div>
             </div>
