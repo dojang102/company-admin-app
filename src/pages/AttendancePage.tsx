@@ -23,7 +23,6 @@ const AttendancePage = () => {
         return saved ? JSON.parse(saved) : {};
     });
 
-    // --- ロジック：部署絞り込み ＆ 五十音順ソート ---
     const filteredAndSortedEmployees = useMemo(() => {
         return employeeList
             .filter(emp => selectedDept === 'すべて' || emp.department === selectedDept)
@@ -101,7 +100,7 @@ const AttendancePage = () => {
 
                             <button
                                 onClick={() => toggleAttendance(emp.id, emp.name)}
-                                className={`w-full py-3 rounded-xl font-bold text-xs transition-all active:scale-95 ${record.isIn ? 'bg-zinc-100 text-zinc-500' : 'bg-zinc-900 text-white'}`}
+                                className={`w-full py-3 rounded-xl font-bold text-xs transition-all active:scale-95 ${record.isIn ? 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200' : 'bg-zinc-800 text-white hover:bg-black'}`}
                             >
                                 {record.isIn ? '退室処理' : '入室処理'}
                             </button>

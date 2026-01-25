@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import { Search, Plus, ChevronUp, ChevronDown, X } from 'lucide-react';
 import { z } from 'zod';
@@ -230,7 +230,7 @@ const EmployeeListPage = () => {
                     />
                 </div>
                 <button
-                    className='flex px-4 py-2 items-center justify-center bg-zinc-800 rounded-lg text-white'
+                    className='flex px-4 py-2 items-center justify-center bg-zinc-800 rounded-lg text-white hover:bg-black'
                     onClick={() => setIsOpenDrawer(true)}
                 >
                     <Plus size={18} />
@@ -373,7 +373,7 @@ const EmployeeListPage = () => {
                     </form>
                     <div className='flex items-center justify-end gap-2'>
                         <button
-                            className='flex px-4 py-2 items-center justify-center border border-zinc-200 rounded-lg'
+                            className='flex px-4 py-2 items-center justify-center border border-zinc-200 rounded-lg hover:bg-zinc-200'
                             onClick={handleCancel}
                         >
                             キャンセル
@@ -381,7 +381,7 @@ const EmployeeListPage = () => {
                         <button
                             type='submit'
                             form='employee-form'
-                            className='flex px-4 py-2 items-center justify-center bg-zinc-800 rounded-lg text-white'
+                            className='flex px-4 py-2 items-center justify-center bg-zinc-800 rounded-lg text-white hover:bg-black'
                         >
                             保存する
                         </button>

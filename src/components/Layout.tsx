@@ -71,7 +71,7 @@ const Layout = ({ children }: LayoutProps) => {
                                 className={getNavStyle('/attendance')}
                             >
                                 <CalendarCheck size={18} />
-                                <span>出席・休職管理</span>
+                                <span>出席管理</span>
                             </button>
                         </li>
                     </ul>

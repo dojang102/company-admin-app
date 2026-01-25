@@ -1,73 +1,39 @@
-# React + TypeScript + Vite
+# Company Admin System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+社員情報の管理および出席状況を管理するための管理者向けWebアプリケーションです。
 
-Currently, two official plugins are available:
+## 実装済み機能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. 認証・セキュリティ
+* **ログイン機能**: 任意の ID/PW (`admin` / `pw1234`) による認証。
+* **認証ガード**: `LocalStorage`を確認し、未ログインユーザーを自動的にログイン画面へリダイレクト。
+* **ログアウト機能**: セッション情報を破棄し、安全にシステムを終了。
 
-## React Compiler
+### 2. 社員管理
+* **社員リスト**: 五十音順および部署順での自動整列。
+* **社員登録**: バリデーションを利用した新しい社員追加。
+* **詳細編集**: 各社員の情報更新機能。
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 3. 出席管理
+* **入退室記録**: 入室ボタン押下時の時刻（HH:mm）を自動記録。
+* **部署別フィルタリング**: セレクトボックスによる動的な表示切り替え。
+* **リアルタイムステータス**: 入室中の社員をバッジとアニメーションで強調表示。
 
-## Expanding the ESLint configuration
+## 技術スタック
+* **Frontend**: React (TypeScript)
+* **Styling**: Tailwind CSS
+* **Icons**: Lucide React
+* **Navigation**: React Router
+* **Notifications**: React-Toastify
+* **Form Management**: React Hook Form
+* **Data Storage**: LocalStorage
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## データ構造 (LocalStorage)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+本システムは、ブラウザの `LocalStorage` を利用してデータの永続化を行っています。
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+| キー | 用途 |
+| :--- | :--- |
+| `is-authenticated` | 認証状態 (`'true'` / `'false'`) |
+| `employee-data` | 社員名簿のマスターデータ |
+| `attendance-status` | 入室状況および打刻時刻の記録オブジェクト |

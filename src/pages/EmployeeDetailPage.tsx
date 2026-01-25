@@ -3,7 +3,7 @@ import PageLayout from '../components/PageLayout';
 import { employees, DEPARTMENTS, POSITIONS, employeeValidation } from './EmployeeListPage';
 import type { Employee } from './EmployeeListPage';
 import { ArrowLeft, Save } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import type { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -67,7 +67,7 @@ const EmployeeDetailPage = () => {
                 <div className='flex justify-between items-center py-4'>
                     <button
                         onClick={() => navigate('/employees')}
-                        className='flex items-center text-zinc-600'
+                        className='flex items-center text-zinc-600 hover:text-zinc-900'
                     >
                         <ArrowLeft size={16} className='mr-1' />
                         <span>リストに戻る</span>
@@ -75,7 +75,7 @@ const EmployeeDetailPage = () => {
                     <button
                         type='submit'
                         disabled={!isDirty}
-                        className='flex px-6 py-2 items-center bg-zinc-800 rounded-lg text-white'
+                        className='flex px-6 py-2 items-center bg-zinc-800 rounded-lg text-white hover:bg-black'
                     >
                         <Save size={16} className='mr-1' />
                         <span>保存する</span>
