@@ -1,11 +1,31 @@
 import React from 'react';
 import { Users, CalendarCheck, LogOut } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface LayoutProps {
     children: React.ReactNode;
 }
 
 const Layout = ({ children }: LayoutProps) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const isActive = (path: string) => {
+        if (path === '/employees') {
+            return location.pathname.startsWith('/employees');
+        }
+        return location.pathname === path
+    };
+
+    const getNavStyle = (path: string) => {
+        const isCurrent = isActive(path);
+        const baseStyle = 'flex items-center w-full gap-3 px-3 py-2 rounded-sm hover:bg-zinc-700';
+        const activeStyle = 'bg-zinc-700 text-white shadow-sm ring-1 ring-white/10';
+        const inactiveStyle = 'text-zinc-400 hover:bg-zinc-700 hover:text-white';
+
+        return `${baseStyle} ${isCurrent ? activeStyle : inactiveStyle}`;
+    };
+
     return (
         <div className='flex min-h-screen'>
 
@@ -19,13 +39,19 @@ const Layout = ({ children }: LayoutProps) => {
                 <nav className='p-4 flex-1'>
                     <ul className='space-y-2'>
                         <li>
-                            <button className='flex items-center w-full gap-3 px-3 py-2 rounded-sm hover:bg-zinc-700'>
+                            <button
+                                onClick={() => navigate('/employees')}
+                                className={getNavStyle('/employees')}
+                            >
                                 <Users size={18} />
                                 <span>社員リスト</span>
                             </button>
                         </li>
                         <li>
-                            <button className='flex items-center w-full gap-3 px-3 py-2 rounded-sm hover:bg-zinc-700'>
+                            <button
+                                onClick={() => navigate('/attendance')}
+                                className={getNavStyle('/attendance')}
+                            >
                                 <CalendarCheck size={18} />
                                 <span>出席・休職管理</span>
                             </button>
