@@ -45,7 +45,7 @@ export const employees: Employee[] = [
 export const DEPARTMENTS = ['開発部', '営業部', '人事部', '総務部', 'マーケティング部'] as const;
 export const POSITIONS = ['部長', '課長', '係長', '主任', '社員'] as const;
 
-const employeeValidation = z.object({
+export const employeeValidation = z.object({
     name: z.string().min(1, '名前は必須です'),
     furigana: z.string().min(1, 'フリガナは必須です').regex(/^[ァ-ヶー\s]+$/, '全角カタカナで入力してください'),
     department: z.string().min(1, '部署を選択してください'),
