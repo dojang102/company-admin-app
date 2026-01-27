@@ -66,6 +66,7 @@ const EmployeeDetailPage = () => {
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className='flex justify-between items-center py-4'>
                     <button
+                        type='button'
                         onClick={() => navigate('/employees')}
                         className='flex items-center text-zinc-600 hover:text-zinc-900'
                     >
