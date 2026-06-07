@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import { Search, Plus, ChevronUp, ChevronDown, X } from 'lucide-react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 export interface Employee {
     id: string;
@@ -60,7 +62,9 @@ type EmployeeFormData = z.infer<typeof employeeValidation>;
 const EmployeeListPage = () => {
     const [inputSearch, setInputSearch] = useState('');         // input value
     // const [tableItems, setTableItems] = useState(employees);    // 社員データー
-    const [tableItems, setTableItems] = useState<Employee[]>(() => {
+
+    // localstorage利用
+    /* const [tableItems, setTableItems] = useState<Employee[]>(() => {
         const saved = localStorage.getItem('employee-data');
 
         if (saved) {
@@ -72,7 +76,9 @@ const EmployeeListPage = () => {
         }
         localStorage.setItem('employee-data', JSON.stringify(employees));
         return employees;
-    });    // 社員データー
+    });    // 社員データー */
+
+    const [tableItems, setTableItems] = useState<Employee[]>([]);
 
     const tableHeaders: { key: keyof Employee; label: string; }[] = [
         { key: 'name', label: '名前' },
@@ -168,6 +174,18 @@ const EmployeeListPage = () => {
             }
         });
 
+    // 社員リスト取得 useEffect
+    useEffect(() => {
+        axios.get('http://localhost:5000/api/employees')
+        .then(response => {
+            setTableItems(response.data);
+        })
+        .catch(error => {
+            console.error('データの取得に失敗しました。：', error);
+            toast.error('サーバーとの通信中エラーが発生しました。');
+        });
+    },[]);
+
     const {
         register,
         handleSubmit,
@@ -190,8 +208,8 @@ const EmployeeListPage = () => {
 
     const watchedValues = watch();
 
-    // 登録保存機能
-    const onSubmit = (data: EmployeeFormData) => {
+    // 登録保存機能 - localstorage
+    /* const onSubmit = (data: EmployeeFormData) => {
         const newEmployee: Employee = {
             ...data,
             id: crypto.randomUUID(),
@@ -205,6 +223,26 @@ const EmployeeListPage = () => {
 
         setIsOpenDrawer(false);
         reset();
+    }; */
+
+    // 登録保存機能 - axios
+    const onSubmit = (data: EmployeeFormData) => {
+        const newEmployee = {
+            ...data
+        };
+
+        axios.post('http://localhost:5000/api/employees', newEmployee)
+        .then(response => {
+            setTableItems(prev => [response.data.data, ...prev]);
+
+            toast.success(response.data.message);
+            setIsOpenDrawer(false);
+            reset();
+        })
+        .catch(error => {
+            console.error('登録保存に失敗しました。', error);
+            toast.error('登録中にエラーが発生しました。')
+        });
     };
 
     const handleCancel = () => {
