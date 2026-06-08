@@ -182,7 +182,15 @@ const EmployeeListPage = () => {
         })
         .catch(error => {
             console.error('データの取得に失敗しました。：', error);
-            toast.error('サーバーとの通信中エラーが発生しました。');
+            toast.error('サーバーとの通信中エラーが発生しました。', {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                }
+            });
         });
     },[]);
 
@@ -235,13 +243,29 @@ const EmployeeListPage = () => {
         .then(response => {
             setTableItems(prev => [response.data.data, ...prev]);
 
-            toast.success(response.data.message);
+            toast.success(response.data.message, {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                }
+            });
             setIsOpenDrawer(false);
             reset();
         })
         .catch(error => {
             console.error('登録保存に失敗しました。', error);
-            toast.error('登録中にエラーが発生しました。')
+            toast.error('登録中にエラーが発生しました。', {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                }
+            })
         });
     };
 

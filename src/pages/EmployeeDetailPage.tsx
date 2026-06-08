@@ -8,6 +8,7 @@ import type { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 type EmployeeFormData = z.infer<typeof employeeValidation>;
 
@@ -24,7 +25,8 @@ const EmployeeDetailPage = () => {
         resolver: zodResolver(employeeValidation),
     });
 
-    useEffect(() => {
+    // localstorage 詳細データ取得
+    /* useEffect(() => {
         const saved = localStorage.getItem('employee-data');
         const data: Employee[] = saved ? JSON.parse(saved) : employees;
         const target = data.find(emp => emp.id === id);
@@ -34,9 +36,10 @@ const EmployeeDetailPage = () => {
         } else {
             navigate('/employees');
         }
-    }, [id, navigate, reset]);
+    }, [id, navigate, reset]); */
 
-    const onSubmit = (formData: EmployeeFormData) => {
+    // localstorage 社員情報編集
+    /* const onSubmit = (formData: EmployeeFormData) => {
         const saved = localStorage.getItem('employee-data');
         const allData: Employee[] = saved ? JSON.parse(saved) : [];
 
@@ -52,10 +55,72 @@ const EmployeeDetailPage = () => {
             position: 'bottom-right',
             autoClose: 3000,
             style: {
-                backgroundColor: '#18181b', // Tailwindのzinc-900相当
+                backgroundColor: '#18181b',
                 color: '#ffffff',
                 borderRadius: '12px'
             },
+        })
+    } */
+
+    // axios 詳細データ取得
+    useEffect(() => {
+        axios.get(`http://localhost:5000/api/employees/${id}`)
+        .then(response => {
+            reset(response.data);
+        })
+        .catch(error => {
+            console.error('詳細データの読み込みに失敗しました：', error);
+            toast.error('社員情報が見つかりませんでした。', {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                }
+            });
+            navigate('/employees');
+        });
+    }, [id, navigate, reset]);
+
+    const onSubmit = (formData: EmployeeFormData) => {
+        if (!isDirty) {
+            toast.info('変更内容がありません！', {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                }
+            });
+            return;
+        }
+        axios.put(`http://localhost:5000/api/employees/${id}`, formData)
+        .then(response => {
+            reset(formData);
+
+            toast.success(response.data.message, {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                },
+            })
+        })
+        .catch(error => {
+            console.error('変更に失敗しました：', error);
+            toast.error('変更に失敗しました', {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                }
+            });
         })
     }
 
@@ -75,7 +140,6 @@ const EmployeeDetailPage = () => {
                     </button>
                     <button
                         type='submit'
-                        disabled={!isDirty}
                         className='flex px-6 py-2 items-center bg-zinc-800 rounded-lg text-white hover:bg-black'
                     >
                         <Save size={16} className='mr-1' />

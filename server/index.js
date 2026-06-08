@@ -37,12 +37,12 @@ let employees = [
     { id: '23', name: '田中 志保', furigana: 'タナカ シホ', department: 'マーケティング部', position: '係長', email: 'tanaka.s@example.com', status: '在籍' },
 ];
 
-// GET
+// GET - 社員リスト
 app.get('/api/employees', (req, res) => {
     res.json(employees);
 });
 
-// POST
+// POST - 社員リスト（登録）
 app.post('/api/employees', (req, res) => {
     const { id, name, furigana, department, position, email, status } = req.body;
 
@@ -64,6 +64,40 @@ app.post('/api/employees', (req, res) => {
     });
 });
 
+// GET - 詳細データ
+app.get('/api/employees/:id', (req, res) => {
+    const { id } = req.params;
+
+    const employee = employees.find(emp => emp.id === id);
+
+    if (employee) {
+        res.json(employee);
+    } else {
+        res.status(404).json({ message: '社員情報が見つかりませんでした。' })
+    }
+});
+
+// PUT - 詳細データ（編集）
+app.put('/api/employees/:id', (req, res) => {
+    const { id } = req.params;
+    const { name, furigana, department, position, email, status } = req.body;
+
+    const index = employees.findIndex(emp => emp.id === id);
+
+    if(index !== -1) {
+        employees[index] = { id, name, furigana, department, position, email, status };
+
+        res.json({
+            message: '変更を保存しました！',
+            data: employees[index]
+        });
+    } else {
+        res.status(404).json({
+            message: '社員情報が見つかりませんでした。'
+        });
+    };
+});
+
 app.listen(PORT, () => {
     console.log(`http://localhost:${PORT}でサーバー動作中`)
-})
+});
