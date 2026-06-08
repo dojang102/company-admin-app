@@ -37,6 +37,8 @@ let employees = [
     { id: '23', name: '田中 志保', furigana: 'タナカ シホ', department: 'マーケティング部', position: '係長', email: 'tanaka.s@example.com', status: '在籍' },
 ];
 
+let attendanceMap = {};
+
 // GET - 社員リスト
 app.get('/api/employees', (req, res) => {
     res.json(employees);
@@ -97,6 +99,31 @@ app.put('/api/employees/:id', (req, res) => {
         });
     };
 });
+
+// GET - 出席データ
+app.get('/api/attendance', (req, res) => {
+    res.json(attendanceMap);
+});
+
+// POST - 出席データ（入退室）
+app.post('/api/attendance/toggle', (req, res) => {
+    const { id } = req.body;
+
+    const current = attendanceMap[id] || { isIn: false };
+    const now = new Date();
+    const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const nextIsIn = !current.isIn;
+
+    attendanceMap[id] = {
+        isIn: nextIsIn,
+        arrivalTime: nextIsIn ? timeString : current.arrivalTime
+    };
+
+    res.json({
+        isIn: nextIsIn,
+        attendanceMap: attendanceMap
+    });
+})
 
 app.listen(PORT, () => {
     console.log(`http://localhost:${PORT}でサーバー動作中`)

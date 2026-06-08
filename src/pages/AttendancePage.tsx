@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
 import { toast } from 'react-toastify';
 import { Clock, Filter } from 'lucide-react';
 import { employees, DEPARTMENTS } from './EmployeeListPage';
 import type { Employee } from './EmployeeListPage';
+import axios from 'axios';
 
 interface AttendanceRecord {
     isIn: boolean;
@@ -13,7 +14,8 @@ interface AttendanceRecord {
 const AttendancePage = () => {
     const [selectedDept, setSelectedDept] = useState<string>('すべて');
 
-    const [employeeList] = useState<Employee[]>(() => {
+    // localstorage 状態管理
+    /* const [employeeList] = useState<Employee[]>(() => {
         const saved = localStorage.getItem('employee-data');
         return saved ? JSON.parse(saved) : employees;
     });
@@ -21,7 +23,22 @@ const AttendancePage = () => {
     const [attendanceMap, setAttendanceMap] = useState<Record<string, AttendanceRecord>>(() => {
         const saved = localStorage.getItem('attendance-status');
         return saved ? JSON.parse(saved) : {};
-    });
+    }); */
+
+    const [employeeList, setEmployeeList] = useState<Employee[]>([]);
+    const [attendanceMap, setAttendanceMap] = useState<Record<string, AttendanceRecord>>({});
+
+    useEffect(() => {
+        // axios 社員リスト
+        axios.get('http://localhost:5000/api/employees')
+        .then(res => setEmployeeList(res.data))
+        .catch(error => console.error('社員リストの読み込みに失敗しました。', error));
+
+        // axios 出席データ
+        axios.get('http://localhost:5000/api/attendance')
+        .then(res => setAttendanceMap(res.data))
+        .catch(error => console.error('出席データ読み込みに失敗しました。', error));
+    }, []);
 
     const filteredAndSortedEmployees = useMemo(() => {
         return employeeList
@@ -33,7 +50,8 @@ const AttendancePage = () => {
             });
     }, [employeeList, selectedDept]);
 
-    const toggleAttendance = (id: string, name: string) => {
+    // localstorage 出席管理
+    /* const toggleAttendance = (id: string, name: string) => {
         const current = attendanceMap[id] || { isIn: false };
         const now = new Date();
         const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
@@ -48,6 +66,23 @@ const AttendancePage = () => {
 
         if (!current.isIn) toast.success(`${name}さんが入室しました`);
         else toast.info(`${name}さんが退室しました`);
+    }; */
+
+    const toggleAttendance = (id: string, name: string) => {
+        axios.post('http://localhost:5000/api/attendance/toggle', { id })
+        .then(res => {
+            setAttendanceMap(res.data.attendanceMap);
+
+            if(res.data.isIn) {
+                toast.success(`${name}さんが入室しました`);
+            } else {
+                toast.info(`${name}さんが退室しました`);
+            }
+        })
+        .catch(error => {
+            console.error('処理中にエラーが発生しました。', error);
+            toast.error('処理中にエラーが発生しました。');
+        });
     };
 
     return (
