@@ -39,6 +39,11 @@ let employees = [
 
 let attendanceMap = {};
 
+let AUTH_CONFIG = {
+    id: 'admin',
+    password: 'pw1234'
+};
+
 // GET - 社員リスト
 app.get('/api/employees', (req, res) => {
     res.json(employees);
@@ -123,6 +128,21 @@ app.post('/api/attendance/toggle', (req, res) => {
         isIn: nextIsIn,
         attendanceMap: attendanceMap
     });
+})
+
+// POST - ログイン
+app.post('/api/auth/login', (req, res) => {
+    const { id, password } = req.body;
+
+    if (id === AUTH_CONFIG.id && password === AUTH_CONFIG.password) {
+        return res.json({
+            success: true
+        });
+    } else {
+        return res.status(401).json({
+            success: false
+        });
+    }
 })
 
 app.listen(PORT, () => {

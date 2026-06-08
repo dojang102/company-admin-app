@@ -65,8 +65,8 @@ const EmployeeDetailPage = () => {
     // axios 詳細データ取得
     useEffect(() => {
         axios.get(`http://localhost:5000/api/employees/${id}`)
-        .then(response => {
-            reset(response.data);
+        .then(res => {
+            reset(res.data);
         })
         .catch(error => {
             console.error('詳細データの読み込みに失敗しました：', error);

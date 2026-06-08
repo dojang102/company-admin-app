@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -5,14 +6,15 @@ import { toast } from 'react-toastify';
 const LoginPage = () => {
     const navigate = useNavigate();
 
-    const AUTH_CONFIG = {
-        id: 'admin',
-        password: 'pw1234'
-    };
+    // const AUTH_CONFIG = {
+    //     id: 'admin',
+    //     password: 'pw1234'
+    // };
 
     const { register, handleSubmit, formState: { errors } } = useForm();
 
-    const onSubmit = (data: any) => {
+    // localstorage ログイン
+    /* const onSubmit = (data: any) => {
         if (data.id === AUTH_CONFIG.id && data.password === AUTH_CONFIG.password) {
             localStorage.setItem('is-authenticated', 'true');
             toast.success('ログインしました');
@@ -20,6 +22,22 @@ const LoginPage = () => {
         } else {
             toast.error('IDまたはパスワードが違います');
         }
+    }; */
+
+    const onSubmit = (data: any) => {
+        axios.post('http://localhost:5000/api/auth/login', {
+            id: data.id,
+            password: data.password
+        })
+        .then(res => {
+            localStorage.setItem('is-authenticated', 'true');
+            toast.success(res.data.message || 'ログインしました');
+            navigate('/employees');
+        })
+        .catch(error => {
+            console.error("ログインエラー", error);
+            toast.error('IDまたはパスワードが違います');
+        });
     };
 
     return (

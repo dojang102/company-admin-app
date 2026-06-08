@@ -177,8 +177,8 @@ const EmployeeListPage = () => {
     // 社員リスト取得 useEffect
     useEffect(() => {
         axios.get('http://localhost:5000/api/employees')
-        .then(response => {
-            setTableItems(response.data);
+        .then(res => {
+            setTableItems(res.data);
         })
         .catch(error => {
             console.error('データの取得に失敗しました。：', error);
@@ -240,10 +240,10 @@ const EmployeeListPage = () => {
         };
 
         axios.post('http://localhost:5000/api/employees', newEmployee)
-        .then(response => {
-            setTableItems(prev => [response.data.data, ...prev]);
+        .then(res => {
+            setTableItems(prev => [res.data.data, ...prev]);
 
-            toast.success(response.data.message, {
+            toast.success(res.data.message, {
                 position: 'bottom-right',
                 autoClose: 1500,
                 style: {
