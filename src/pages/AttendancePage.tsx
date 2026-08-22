@@ -74,14 +74,38 @@ const AttendancePage = () => {
             setAttendanceMap(res.data.attendanceMap);
 
             if(res.data.isIn) {
-                toast.success(`${name}さんが入室しました`);
+                toast.success(`${name}さんが入室しました`, {
+                    position: 'bottom-right',
+                    autoClose: 1500,
+                    style: {
+                        backgroundColor: '#18181b',
+                        color: '#ffffff',
+                        borderRadius: '12px'
+                    }
+                });
             } else {
-                toast.info(`${name}さんが退室しました`);
+                toast.info(`${name}さんが退室しました`, {
+                    position: 'bottom-right',
+                    autoClose: 1500,
+                    style: {
+                        backgroundColor: '#18181b',
+                        color: '#ffffff',
+                        borderRadius: '12px'
+                    }
+                });
             }
         })
         .catch(error => {
             console.error('処理中にエラーが発生しました。', error);
-            toast.error('処理中にエラーが発生しました。');
+            toast.error('処理中にエラーが発生しました。', {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                }
+            });
         });
     };
 

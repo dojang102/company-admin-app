@@ -25,18 +25,47 @@ const LoginPage = () => {
     }; */
 
     const onSubmit = (data: any) => {
+        if(!data.id?.trim() || !data.password?.trim()) {
+            toast.error('IDまたはパスワードを入力してください。', {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                }
+            })
+            return;
+        };
+
         axios.post('http://localhost:5000/api/auth/login', {
             id: data.id,
             password: data.password
         })
         .then(res => {
             localStorage.setItem('is-authenticated', 'true');
-            toast.success(res.data.message || 'ログインしました');
+            toast.success(res.data.message || 'ログインしました。', {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                }
+            });
             navigate('/employees');
         })
         .catch(error => {
             console.error("ログインエラー", error);
-            toast.error('IDまたはパスワードが違います');
+            toast.error('IDまたはパスワードが違います。', {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                }
+            });
         });
     };
 
@@ -53,7 +82,7 @@ const LoginPage = () => {
                 >
                     <div className='space-y-1'>
                         <input
-                            {...register('id', { required: true })}
+                            {...register('id')}
                             type='text'
                             placeholder='ID (admin)'
                             className={`w-full border rounded-xl p-3 bg-white outline-none transition-all focus:ring-2 focus:ring-white/20 ${errors.id ? 'border-red-500' : 'border-transparent'}`}
@@ -62,7 +91,7 @@ const LoginPage = () => {
 
                     <div className='space-y-1'>
                         <input
-                            {...register('password', { required: true })}
+                            {...register('password')}
                             type='password'
                             placeholder='PW (pw1234)'
                             className={`w-full border rounded-xl p-3 bg-white outline-none transition-all focus:ring-2 focus:ring-white/20 ${errors.password ? 'border-red-500' : 'border-transparent'}`}

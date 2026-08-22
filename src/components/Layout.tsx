@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Users, CalendarCheck, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -15,7 +16,15 @@ const Layout = ({ children }: LayoutProps) => {
         const isAuthenticated = localStorage.getItem('is-authenticated');
 
         if (isAuthenticated !== 'true') {
-            toast.error('セッションが切れました。再ログインしてください。');
+            toast.error('セッションが切れました。再ログインしてください。', {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                }
+            });
             navigate('/login', { replace: true });
         }
     }, [navigate]);
@@ -36,12 +45,36 @@ const Layout = ({ children }: LayoutProps) => {
         return `${baseStyle} ${isCurrent ? activeStyle : inactiveStyle}`;
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('is_authenticated');
+    // 既存ログアウト
+    /* const handleLogout = () => {
+        localStorage.removeItem('is-authenticated');
 
         toast.info('ログアウトしました');
 
         navigate('/login', { replace: true });
+    } */
+
+    // axios ログアウト
+    const handleLogout = () => {
+        axios.post('http://localhost:5000/api/auth/logout')
+        .then(res => {
+            localStorage.removeItem('is-authenticated');
+            toast.info('ログアウトしました。', {
+                position: 'bottom-right',
+                autoClose: 1500,
+                style: {
+                    backgroundColor: '#18181b',
+                    color: '#ffffff',
+                    borderRadius: '12px'
+                }
+            });
+            navigate('/login', { replace: true });
+        })
+        .catch(error => {
+            console.error('ログアウト処理中エラー発生', error);
+            localStorage.removeItem('is-authenticated');
+            navigate('/login', { replace: true });
+        });
     }
 
     return (

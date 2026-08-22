@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { success } = require('zod');
 
 const app = express();
 const PORT = 5000;
@@ -143,6 +144,11 @@ app.post('/api/auth/login', (req, res) => {
             success: false
         });
     }
+})
+
+// POST - ログアウト
+app.post('/api/auth/logout', (req, res) => {
+    res.json({ success: true, });
 })
 
 app.listen(PORT, () => {
