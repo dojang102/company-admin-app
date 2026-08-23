@@ -215,8 +215,8 @@ const EmployeeDetailPage = () => {
                                         {...register('status')}
                                         className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none focus:border-zinc-800 text-lg'
                                     >
-                                        <option value='在籍'>在籍</option>
-                                        <option value='休職中'>休職中</option>
+                                        <option value='在職'>在職</option>
+                                        <option value='休職'>休職</option>
                                     </select>
                                 </div>
                             </div>
