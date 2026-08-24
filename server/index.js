@@ -35,7 +35,6 @@ app.get("/api/employees", async (req, res) => {
 
     const employees = result.rows;
     res.json(employees);
-    console.log(employees);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "DB Error" });
@@ -65,15 +64,30 @@ app.post("/api/employees", (req, res) => {
 });
 
 // GET - 詳細データ
-app.get("/api/employees/:id", (req, res) => {
+app.get("/api/employees/:id", async (req, res) => {
   const { id } = req.params;
 
-  const employee = employees.find((emp) => emp.id === id);
+  // const employee = employees.find((emp) => emp.empno === id);
 
-  if (employee) {
+  // if (employee) {
+  //   res.json(employee);
+  // } else {
+  //   res.status(404).json({ message: "社員情報が見つかりませんでした。" });
+  // }
+  try {
+    const employee = await db.query(
+      `select e.empno, e.ename, e.furigana, e.position, e.email, e.emp_status, TO_CHAR(e.hiredate, 'yyyy-mm-dd') as hiredate, d.dname
+    from emp as e
+    left join dept as d
+    on e.deptno = d.deptno
+    where e.empno = ${id};
+    `,
+    );
     res.json(employee);
-  } else {
-    res.status(404).json({ message: "社員情報が見つかりませんでした。" });
+    console.log(employee);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "DB Error" });
   }
 });
 

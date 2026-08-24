@@ -7,7 +7,6 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { DayPicker } from "react-day-picker";
 
 export interface Employee {
   empno: number;
@@ -19,17 +18,21 @@ export interface Employee {
   hiredate: string;
   emp_status: string;
 }
-
 export const employees: Employee[] = [];
-
 export const DEPARTMENTS = [
-  "開発部",
-  "営業部",
-  "人事部",
-  "総務部",
-  "マーケティング部",
+  { id: 100, value: "営業部" },
+  { id: 200, value: "開発部" },
+  { id: 300, value: "人事部" },
+  { id: 400, value: "総務部" },
+  { id: 500, value: "マーケティング部" },
 ] as const;
-export const POSITIONS = ["部長", "課長", "係長", "主任", "社員"] as const;
+export const POSITIONS = [
+  { id: 10, value: "部長" },
+  { id: 20, value: "課長" },
+  { id: 30, value: "係長" },
+  { id: 40, value: "主任" },
+  { id: 50, value: "社員" },
+] as const;
 
 export const employeeValidation = z.object({
   name: z.string().min(1, "名前は必須です"),
@@ -43,7 +46,7 @@ export const employeeValidation = z.object({
     .string()
     .min(1, "メールアドレス必須です")
     .email("正しいメール形式で入力してください"),
-  emp_status: z.enum(["在籍", "休職中"]),
+  emp_status: z.enum(["在籍", "休職"]),
 });
 
 type EmployeeFormData = z.infer<typeof employeeValidation>;
@@ -176,7 +179,6 @@ const EmployeeListPage = () => {
         } else {
           setTableItems([]);
         }
-
       })
       .catch((error) => {
         console.error("データの取得に失敗しました。：", error);
@@ -273,8 +275,6 @@ const EmployeeListPage = () => {
     setIsOpenDrawer(false);
   };
 
-  const [date, setDate] = useState();
-
   return (
     <PageLayout title="社員リスト">
       {/* 検索と追加ボタン */}
@@ -357,10 +357,11 @@ const EmployeeListPage = () => {
                   <td className="px-6 py-4 text-sm">{employee.hiredate}</td>
                   <td className="px-6 py-4 text-sm">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${employee.emp_status === "在籍"
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        employee.emp_status === "在籍"
                           ? "bg-green-100 text-green-700"
                           : "bg-zinc-100 text-zinc-600"
-                        }`}
+                      }`}
                     >
                       {employee.emp_status}
                     </span>
@@ -373,13 +374,15 @@ const EmployeeListPage = () => {
       </div>
       {/* 社員追加ドロワー */}
       <div
-        className={`fixed inset-0 bg-black/20 z-40 transition-opacity duration-300 ${isOpenDrawer ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+        className={`fixed inset-0 bg-black/20 z-40 transition-opacity duration-300 ${
+          isOpenDrawer ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={() => setIsOpenDrawer(false)}
       />
       <div
-        className={`fixed inset-y-0 right-0 w-[400px] z-50 m-4 transform transition-transform duration-300 ease-in-out ${isOpenDrawer ? "translate-x-0" : "translate-x-[calc(100%+32px)]"
-          }`}
+        className={`fixed inset-y-0 right-0 w-[400px] z-50 m-4 transform transition-transform duration-300 ease-in-out ${
+          isOpenDrawer ? "translate-x-0" : "translate-x-[calc(100%+32px)]"
+        }`}
       >
         <div className="h-full flex flex-col p-6 bg-white rounded-md">
           <div className="sticky top-0 flex items-center justify-between">
@@ -402,10 +405,14 @@ const EmployeeListPage = () => {
               const isPlaceholder = currentValue === "";
               return (
                 <div key={header.key}>
-                  <label className="block text-sm font-semibold text-zinc-700 mb-1">
+                  <label
+                    className={`block text-sm font-semibold text-zinc-700 mb-1 ${header.key === "hiredate" ? "hidden" : " "}`}
+                  >
                     {header.label}
                   </label>
-                  {["department", "position", "emp_status"].includes(header.key) ? (
+                  {["department", "position", "emp_status"].includes(
+                    header.key,
+                  ) ? (
                     <select
                       {...register(header.key as any)}
                       className={`w-full border rounded-xl p-2 focus:outline-none transition-all
@@ -422,28 +429,28 @@ const EmployeeListPage = () => {
                         ? DEPARTMENTS
                         : header.key === "position"
                           ? POSITIONS
-                          : ["在籍", "休職中"]
+                          : [
+                              { id: 1, value: "在籍" },
+                              { id: 2, value: "休職" },
+                            ]
                       ).map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
+                        <option key={opt.id} value={opt.value}>
+                          {opt.value}
                         </option>
                       ))}
                     </select>
+                  ) : header.key === "hiredate" ? (
+                    <div className="hidden"></div>
                   ) : (
-                    header.key === "hiredate" ? (
-                      <div className="hidden">
-                      </div>
-                    ) : (
-                      <input
-                        {...register(header.key as any)}
-                        type="text"
-                        placeholder={`${header.label}を入力してください`}
-                        className={`w-full border rounded-xl p-2 focus:outline-none transition-all
+                    <input
+                      {...register(header.key as any)}
+                      type="text"
+                      placeholder={`${header.label}を入力してください`}
+                      className={`w-full border rounded-xl p-2 focus:outline-none transition-all
                                             ${hasError ? "border-red-500" : "border-zinc-200 focus:ring-2 focus:ring-zinc-800"}
                                             `}
-                      />)
+                    />
                   )}
-
 
                   {errors[header.key as keyof EmployeeFormData] && (
                     <p className="text-red-500 text-xs mt-1 ml-1">
