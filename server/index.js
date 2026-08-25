@@ -43,16 +43,16 @@ app.get("/api/employees", async (req, res) => {
 
 // POST - 社員リスト（登録）
 app.post("/api/employees", (req, res) => {
-  const { id, name, furigana, department, position, email, status } = req.body;
+  const { ename, furigana, dname, position, email, emp_status } = req.body;
 
   const newEmployee = {
     id: crypto.randomUUID(),
-    name,
+    ename,
     furigana,
-    department,
+    dname,
     position,
     email,
-    status,
+    emp_status,
   };
 
   employees.push(newEmployee);

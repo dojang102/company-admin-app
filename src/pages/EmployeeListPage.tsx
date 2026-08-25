@@ -41,12 +41,14 @@ export const employeeValidation = z.object({
     .min(1, "フリガナは必須です")
     .regex(/^[ァ-ヶー\s]+$/, "全角カタカナで入力してください"),
   dname: z.string().min(1, "部署を選択してください"),
+  // deptno: z.number().optional,
   position: z.string().min(1, "役職を選択してください"),
   email: z
     .string()
     .min(1, "メールアドレス必須です")
     .email("正しいメール形式で入力してください"),
   emp_status: z.enum(["在籍", "休職"]),
+  // hiredate: z.string().optional
 });
 
 type EmployeeFormData = z.infer<typeof employeeValidation>;
@@ -205,9 +207,9 @@ const EmployeeListPage = () => {
     mode: "onSubmit",
     reValidateMode: "onChange",
     defaultValues: {
-      name: "",
+      ename: "",
       furigana: "",
-      department: "",
+      dname: "",
       position: "",
       email: "",
       emp_status: "在籍",
@@ -235,10 +237,12 @@ const EmployeeListPage = () => {
 
   // 登録保存機能 - axios
   const onSubmit = (data: EmployeeFormData) => {
+    const hiredate = Date();
     const newEmployee = {
       ...data,
+      hiredate,
     };
-
+    console.log(newEmployee)
     axios
       .post("http://localhost:5000/api/employees", newEmployee)
       .then((res) => {
@@ -410,7 +414,7 @@ const EmployeeListPage = () => {
                   >
                     {header.label}
                   </label>
-                  {["department", "position", "emp_status"].includes(
+                  {["dname", "position", "emp_status"].includes(
                     header.key,
                   ) ? (
                     <select
