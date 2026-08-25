@@ -128,7 +128,7 @@ app.get("/api/employees/:id", async (req, res) => {
   // }
   try {
     const result = await db.query(
-      `select e.empno, e.ename, e.furigana, e.position, e.email, e.emp_status, TO_CHAR(e.hiredate, 'yyyy-mm-dd') as hiredate, d.dname
+      `select e.empno, e.ename, e.furigana, e.position, e.email, e.emp_status, TO_CHAR(e.hiredate, 'yyyy-mm-dd') as hiredate, e.deptno, d.dname
     from emp as e
     left join dept as d
     on e.deptno = d.deptno
@@ -146,31 +146,66 @@ app.get("/api/employees/:id", async (req, res) => {
 });
 
 // PUT - 詳細データ（編集）
-app.put("/api/employees/:id", (req, res) => {
+app.put("/api/employees/:id", async (req, res) => {
   const { id } = req.params;
-  const { name, furigana, department, position, email, status } = req.body;
+  const { ename, furigana, deptno, position, email, emp_status } = req.body;
 
-  const index = employees.findIndex((emp) => emp.id === id);
+  // const index = employees.findIndex((emp) => emp.id === id);
 
-  if (index !== -1) {
-    employees[index] = {
-      id,
-      name,
-      furigana,
-      department,
-      position,
-      email,
-      status,
-    };
+  // if (index !== -1) {
+  //   employees[index] = {
+  //     id,
+  //     name,
+  //     furigana,
+  //     department,
+  //     position,
+  //     email,
+  //     status,
+  //   };
+
+  //   res.json({
+  //     message: "変更を保存しました！",
+  //     data: employees[index],
+  //   });
+  // } else {
+  // res.status(404).json({
+  //   message: "社員情報が見つかりませんでした。",
+  // });
+  // }
+
+  try {
+    const updateResult = await db.query(
+      `update emp
+      set ename = $1, furigana = $2, deptno = $3, position = $4, email = $5, emp_status = $6
+      where empno = $7
+      `,
+      [ename, furigana, deptno, position, email, emp_status, id],
+    );
+
+    if (updateResult.rowCount === 0) {
+      return res.status(404).json({
+        message: "社員情報が見つかりませんでした。",
+      });
+    }
+
+    const result = await db.query(
+      `select e.empno, e.ename, e.furigana, e.position, e.email, e.emp_status, to_char(e.hiredate, 'yyyy-mm-dd') as hiredate, e.deptno, d.dname
+      from emp as e
+      left join dept as d on e.deptno = d.deptno
+      where e.empno = $1
+      `,
+      [id],
+    );
+
+    const updatedEmployee = result.rows[0];
 
     res.json({
       message: "変更を保存しました！",
-      data: employees[index],
+      data: updatedEmployee,
     });
-  } else {
-    res.status(404).json({
-      message: "社員情報が見つかりませんでした。",
-    });
+  } catch (error) {
+    console.error("UPDATE error:", error);
+    res.status(500).json({ message: "DB Error" });
   }
 });
 
