@@ -210,28 +210,115 @@ app.put("/api/employees/:id", async (req, res) => {
 });
 
 // GET - 出席データ
-app.get("/api/attendance", (req, res) => {
-  res.json(attendanceMap);
+app.get("/api/attendance", async (req, res) => {
+  // res.json(attendanceMap);
+  try {
+    const result = await db.query(
+      `select distinct on (empno)
+      empno,
+      (leave is null) as "isIn",
+      to_char(arrived, 'HH24:MI') as "arrivalTime"
+      from att
+      where att_date = current_date
+      order by empno, attno desc;
+      `,
+    );
+
+    const attendanceMap = {};
+    result.rows.forEach((row) => {
+      attendanceMap[row.empno] = {
+        isIn: row.isIn,
+        arrivalTime: row.arrivalTime,
+      };
+    });
+
+    res.json(attendanceMap);
+  } catch (error) {
+    console.error("Attendance GET Error:", error);
+    res.status(500).json({ message: "DB Error" });
+  }
 });
 
 // POST - 出席データ（入退室）
-app.post("/api/attendance/toggle", (req, res) => {
-  const { id } = req.body;
+app.post("/api/attendance/toggle", async (req, res) => {
+  // const { id } = req.body;
 
-  const current = attendanceMap[id] || { isIn: false };
-  const now = new Date();
-  const timeString = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
-  const nextIsIn = !current.isIn;
+  // const current = attendanceMap[id] || { isIn: false };
+  // const now = new Date();
+  // const timeString = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+  // const nextIsIn = !current.isIn;
 
-  attendanceMap[id] = {
-    isIn: nextIsIn,
-    arrivalTime: nextIsIn ? timeString : current.arrivalTime,
-  };
+  // attendanceMap[id] = {
+  //   isIn: nextIsIn,
+  //   arrivalTime: nextIsIn ? timeString : current.arrivalTime,
+  // };
 
-  res.json({
-    isIn: nextIsIn,
-    attendanceMap: attendanceMap,
-  });
+  // res.json({
+  //   isIn: nextIsIn,
+  //   attendanceMap: attendanceMap,
+  // });
+
+  const { empno, deptno } = req.body;
+
+  try {
+    const todayAtt = await db.query(
+      `select attno, arrived, leave
+      from att
+      where empno = $1 and att_date = current_date
+      order by attno desc
+      limit 1;
+      `,
+      [empno],
+    );
+
+    if (todayAtt.rows.length === 0) {
+      const insertResult = await db.query(
+        `insert into att (arrived, empno, deptno, att_date)
+        values (current_timestamp, $1, $2, current_date)
+        returning attno, to_char(arrived, 'HH24:MI') as arrival_time;
+        `,
+        [empno, deptno],
+      );
+
+      return res.json({
+        isIn: true,
+        arrivalTime: insertResult.rows[0].arrival_time,
+        message: "入室しました",
+      });
+    } else if (todayAtt.rows[0].leave === null) {
+      const currentAttNo = todayAtt.rows[0].attno;
+
+      await db.query(
+        `update att
+        set leave = current_timestamp
+        where attno = $1;
+        `,
+        [currentAttNo],
+      );
+
+      return res.json({
+        isIn: false,
+        message: "退室しました",
+      });
+    } else {
+      const reInsertResult = await db.query(
+        `insert into att (arrived, empno, deptno, att_date)
+        values (current_timestamp, $1, $2, current_date)
+        returning attno, to_char(arrived, 'HH24:MI') as arrival_time;
+        `,
+        [empno, deptno],
+      );
+
+      return res.json({
+        isIn: true,
+        arrivalTime: reInsertResult.rows[0].arrival_time,
+        message: "再入室しました",
+      });
+    }
+  } catch (error) {
+    console.error("Attendance Toggle Error:", error);
+    res.status(500).json({ message: "DB Error" });
+  }
 });
 
 // POST - ログイン
