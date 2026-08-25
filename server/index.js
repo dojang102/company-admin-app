@@ -42,25 +42,77 @@ app.get("/api/employees", async (req, res) => {
 });
 
 // POST - 社員リスト（登録）
-app.post("/api/employees", (req, res) => {
-  const { ename, furigana, dname, position, email, emp_status } = req.body;
+app.post("/api/employees", async (req, res) => {
+  const { ename, furigana, deptno, position, email, emp_status } = req.body;
 
-  const newEmployee = {
-    id: crypto.randomUUID(),
-    ename,
-    furigana,
-    dname,
-    position,
-    email,
-    emp_status,
-  };
+  // const newEmployee = {
+  //   id: crypto.randomUUID(),
+  //   ename,
+  //   furigana,
+  //   dname,
+  //   position,
+  //   email,
+  //   emp_status,
+  // };
 
-  employees.push(newEmployee);
+  // employees.push(newEmployee);
 
-  res.status(201).json({
-    message: "登録完了しました",
-    data: newEmployee,
-  });
+  // res.status(201).json({
+  //   message: "登録完了しました",
+  //   data: newEmployee,
+  // });
+  try {
+    const currentYearStr = new Date().getFullYear().toString();
+    const yearDigits = currentYearStr.slice(-2);
+
+    const empnoPrefix = `${yearDigits}${deptno}`;
+
+    const maxEmpnoResult = await db.query(
+      `select empno from emp
+      where cast(empno as text) like $1
+      order by empno desc
+      limit 1;
+      `,
+      [`${empnoPrefix}%`],
+    );
+
+    let nextSequence = 1;
+
+    if (maxEmpnoResult.rows.length > 0) {
+      const lastEmpnoStr = maxEmpnoResult.rows[0].empno.toString();
+      const lastSeqStr = lastEmpnoStr.slice(empnoPrefix.length);
+      nextSequence = parseInt(lastSeqStr, 10) + 1;
+    }
+
+    const sequenceStr = nextSequence.toString().padStart(2, "0");
+    const newEmpno = parseInt(`${empnoPrefix}${sequenceStr}`, 10);
+
+    await db.query(
+      `insert into emp (empno, ename, furigana, deptno, position, email, emp_status, hiredate)
+      values ($1, $2, $3, $4, $5, $6, $7, current_date)
+      `,
+      [newEmpno, ename, furigana, deptno, position, email, emp_status],
+    );
+
+    const result = await db.query(
+      `select e.empno, e.ename, e.furigana, e.position, e.email, e.emp_status, to_char(e.hiredate, 'yyyy-mm-dd') as hiredate, d.dname
+      from emp as e
+      left join dept as d on e.deptno = d.deptno
+      where e.empno = $1;
+      `,
+      [newEmpno],
+    );
+
+    const newEmployee = result.rows[0];
+
+    res.status(201).json({
+      message: "登録完了しました",
+      data: newEmployee,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "DB error" });
+  }
 });
 
 // GET - 詳細データ
@@ -80,11 +132,12 @@ app.get("/api/employees/:id", async (req, res) => {
     from emp as e
     left join dept as d
     on e.deptno = d.deptno
-    where e.empno = ${id} limit 1;
+    where e.empno = $1 limit 1;
     `,
+      [id],
     );
-    
-    const employee = result.rows[0]
+
+    const employee = result.rows[0];
     res.json(employee);
   } catch (error) {
     console.log(error);

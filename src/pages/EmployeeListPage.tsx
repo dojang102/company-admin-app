@@ -40,8 +40,7 @@ export const employeeValidation = z.object({
     .string()
     .min(1, "フリガナは必須です")
     .regex(/^[ァ-ヶー\s]+$/, "全角カタカナで入力してください"),
-  dname: z.string().min(1, "部署を選択してください"),
-  // deptno: z.number().optional,
+  deptno: z.coerce.number().min(1, "部署を選択してください"),
   position: z.string().min(1, "役職を選択してください"),
   email: z
     .string()
@@ -209,7 +208,7 @@ const EmployeeListPage = () => {
     defaultValues: {
       ename: "",
       furigana: "",
-      dname: "",
+      deptno: 0,
       position: "",
       email: "",
       emp_status: "在籍",
@@ -237,14 +236,8 @@ const EmployeeListPage = () => {
 
   // 登録保存機能 - axios
   const onSubmit = (data: EmployeeFormData) => {
-    const hiredate = Date();
-    const newEmployee = {
-      ...data,
-      hiredate,
-    };
-    console.log(newEmployee)
     axios
-      .post("http://localhost:5000/api/employees", newEmployee)
+      .post("http://localhost:5000/api/employees", data)
       .then((res) => {
         setTableItems((prev) => [res.data.data, ...prev]);
 
@@ -403,6 +396,9 @@ const EmployeeListPage = () => {
             className="flex-1 overflow-y-auto p-6 space-y-6"
           >
             {tableHeaders.map((header) => {
+              const fieldKey = (
+                header.key === "dname" ? "deptno" : header.key
+              ) as keyof EmployeeFormData;
               const hasError = !!errors[header.key as keyof EmployeeFormData];
               const currentValue =
                 watchedValues[header.key as keyof EmployeeFormData];
@@ -414,11 +410,9 @@ const EmployeeListPage = () => {
                   >
                     {header.label}
                   </label>
-                  {["dname", "position", "emp_status"].includes(
-                    header.key,
-                  ) ? (
+                  {["dname", "position", "emp_status"].includes(header.key) ? (
                     <select
-                      {...register(header.key as any)}
+                      {...register(fieldKey as any)}
                       className={`w-full border rounded-xl p-2 focus:outline-none transition-all
                                             ${hasError ? "border-red-500" : "border-zinc-200"}
                                             ${isPlaceholder ? "text-zinc-400" : "text-zinc-900"}
@@ -429,19 +423,26 @@ const EmployeeListPage = () => {
                           {header.label}を選択してください
                         </option>
                       )}
-                      {(header.key === "dname"
-                        ? DEPARTMENTS
+                      {header.key === "dname"
+                        ? DEPARTMENTS.map((opt) => (
+                            <option key={opt.id} value={opt.id}>
+                              {opt.value}
+                            </option>
+                          ))
                         : header.key === "position"
-                          ? POSITIONS
+                          ? POSITIONS.map((opt) => (
+                              <option key={opt.id} value={opt.value}>
+                                {opt.value}
+                              </option>
+                            ))
                           : [
                               { id: 1, value: "在籍" },
                               { id: 2, value: "休職" },
-                            ]
-                      ).map((opt) => (
-                        <option key={opt.id} value={opt.value}>
-                          {opt.value}
-                        </option>
-                      ))}
+                            ].map((opt) => (
+                              <option key={opt.id} value={opt.value}>
+                                {opt.value}
+                              </option>
+                            ))}
                     </select>
                   ) : header.key === "hiredate" ? (
                     <div className="hidden"></div>
