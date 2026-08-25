@@ -75,16 +75,17 @@ app.get("/api/employees/:id", async (req, res) => {
   //   res.status(404).json({ message: "社員情報が見つかりませんでした。" });
   // }
   try {
-    const employee = await db.query(
+    const result = await db.query(
       `select e.empno, e.ename, e.furigana, e.position, e.email, e.emp_status, TO_CHAR(e.hiredate, 'yyyy-mm-dd') as hiredate, d.dname
     from emp as e
     left join dept as d
     on e.deptno = d.deptno
-    where e.empno = ${id};
+    where e.empno = ${id} limit 1;
     `,
     );
+    
+    const employee = result.rows[0]
     res.json(employee);
-    console.log(employee);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "DB Error" });

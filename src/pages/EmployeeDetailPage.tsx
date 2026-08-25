@@ -154,10 +154,10 @@ const EmployeeDetailPage = () => {
                                     <label className='block text-sm font-semibold mb-1'>名前</label>
                                     <input
                                         type='text'
-                                        {...register('name')}
+                                        {...register('ename')}
                                         className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none focus:border-zinc-800 text-lg'
                                     />
-                                    {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
+                                    {errors.ename && <p className="text-red-500 text-xs">{errors.ename.message}</p>}
                                 </div>
                             </div>
                             <div className='flex-1 space-y-2'>
@@ -177,10 +177,10 @@ const EmployeeDetailPage = () => {
                                 <div>
                                     <label className='block text-sm font-semibold mb-1'>部署</label>
                                     <select
-                                        {...register('department')}
+                                        {...register('dname')}
                                         className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none focus:border-zinc-800 text-lg'
                                     >
-                                        {DEPARTMENTS.map(dept => <option key={dept} value={dept}>{dept}</option>)}
+                                        {DEPARTMENTS.map(dept => <option key={dept.id} value={dept.value}>{dept.value}</option>)}
                                     </select>
                                 </div>
                             </div>
@@ -191,7 +191,7 @@ const EmployeeDetailPage = () => {
                                         {...register('position')}
                                         className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none focus:border-zinc-800 text-lg'
                                     >
-                                        {POSITIONS.map(pos => <option key={pos} value={pos}>{pos}</option>)}
+                                        {POSITIONS.map(pos => <option key={pos.id} value={pos.value}>{pos.value}</option>)}
                                     </select>
                                 </div>
                             </div>
@@ -212,7 +212,7 @@ const EmployeeDetailPage = () => {
                                 <div>
                                     <label className='block text-sm font-semibold mb-1'>ステータス</label>
                                     <select
-                                        {...register('status')}
+                                        {...register('emp_status')}
                                         className='w-full border border-zinc-200 rounded-xl p-2 focus:outline-none focus:border-zinc-800 text-lg'
                                     >
                                         <option value='在籍'>在籍</option>

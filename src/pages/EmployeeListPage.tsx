@@ -35,12 +35,12 @@ export const POSITIONS = [
 ] as const;
 
 export const employeeValidation = z.object({
-  name: z.string().min(1, "名前は必須です"),
+  ename: z.string().min(1, "名前は必須です"),
   furigana: z
     .string()
     .min(1, "フリガナは必須です")
     .regex(/^[ァ-ヶー\s]+$/, "全角カタカナで入力してください"),
-  department: z.string().min(1, "部署を選択してください"),
+  dname: z.string().min(1, "部署を選択してください"),
   position: z.string().min(1, "役職を選択してください"),
   email: z
     .string()
