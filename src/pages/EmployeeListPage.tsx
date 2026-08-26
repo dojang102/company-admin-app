@@ -12,6 +12,7 @@ export interface Employee {
   empno: number;
   ename: string;
   furigana: string;
+  deptno: number;
   dname: string;
   position: string;
   email: string;

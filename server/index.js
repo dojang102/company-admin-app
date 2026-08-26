@@ -26,7 +26,7 @@ let AUTH_CONFIG = {
 app.get("/api/employees", async (req, res) => {
   try {
     const result = await db.query(
-      `select e.empno, e.ename, e.furigana, e.position, e.email, e.emp_status, TO_CHAR(e.hiredate, 'yyyy-mm-dd') as hiredate, d.dname
+      `select e.empno, e.ename, e.furigana, e.position, e.email, e.emp_status, e.deptno, TO_CHAR(e.hiredate, 'yyyy-mm-dd') as hiredate, d.dname
       from emp as e
       left join dept as d
       on e.deptno = d.deptno
